@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@5.0.1/reset.min.css">
+  <link rel="stylesheet" href="./scss/main.scss" />
+  <script defer src="./js/main.js"></script>
+  <title>Document</title>
+
+<script>
+
+
+
+</script>
+</head>
+
+<body>
+  <!-- <div id="app"></div> -->
+  <div class="wrap">
+    <div class="section option-info type1"><!-- -->
+      <div class="option-info__wrap">
+        <div class="option-info__slider">
+          <div class="option-info__item" data-id=""><!-- -->
+            <div class="option-info__item-img">
+              <div class="img"><img src="" alt="" /></div>
+            </div>
+            <div class="option-info__item-desc">
+              <p class="tit"></p>
+              <p class="desc"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section option-info type2">
+
+    </div>
+    <div class="section">
+
+    </div>
+  </div>
+</body>
+
+</html>
+
+<script>
+
+const componentFunc = () => {
+  const $section = document.querySelectorAll('.section');
+  console.log($section)
+
+  const init = () => {
+    sectionList();
+  }
+  
+
+
+  const sectionList = () => {
+    
+    $section.forEach((sectionE,sectionI) =>{
+      let $this = sectionE;
+      console.log(sectionE)
+      
+      if(sectionI == 0 ){
+        console.log("1번");
+        let test = localRenderPosts_1();
+        console.log(test)
+
+      }
+    })
+
+
+   
+
+ }
+ 
+  
+  const localRenderPosts_1 = async () => {
+    let optionUrl = "http://localhost:4000/posts1";
+
+    try {
+      const res = await fetch(optionUrl);
+      const posts = await res.json();
+      // console.log(posts);
+
+      let optTemplate = '';
+      posts.forEach(post => {
+        optTemplate += `
+          <div class="option-info__item" data-id="${post.postId}">
+            <div class="option-info__item-img">
+              <div class="img"><img src="${post.img}" alt="" /></div>
+            </div>
+            <div class="option-info__item-desc">
+              <p class="tit">${post.tit}</p>
+              <p class="desc">${post.description}</p>
+            </div>
+          </div>
+        `
+      })
+      return optTemplate;
+    }catch (error){
+      console.log(error)
+    }
+  }
+
+
+
+  // common func
+  const forEachFunc = (el, func) => { // forEach 
+    let $forThis = $(el)
+    
+    $(el).forEach((ee,ii) => {
+
+    })
+    
+  }
+
+  init();
+} // e: componentFunc
+window.addEventListener('DOMContentLoaded', () => componentFunc());
+
+</script>
