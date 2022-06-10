@@ -2,16 +2,6 @@ import './scss/main.scss'
 import Swiper from 'swiper';
 import 'swiper/css';
 
-const swiperr = document.querySelectorAll('.swiper')[0];
-console.log(swiperr)
-const swiper = new Swiper(swiperr);
-
-/*
-  비동기 : 
-  데이터 통신을 가장 최상단으로 위치 
-  작업 동작 설명 및 이해 
-*/
-
 
 const componentFunc = () => {
   const section = document.querySelectorAll('.section'),
@@ -27,7 +17,7 @@ const componentFunc = () => {
       
       if(sectionI == 0 ){ // 첫번째일 경우에만 - 임시 나중엔 1,2 같이 3번만 다르게
         jsonData(sectionUrl1).then((data) => {
-          slidePush(_this, dataFunc(data));
+          listPush(_this, dataMapTag(data));
           setTimeout (() =>{ 
             iniData.push(data); // 데이터 따로 저장
           },500)
@@ -45,25 +35,70 @@ const componentFunc = () => {
 
 } // e: componentFunc
 
-const jsonData = async (jsonUrl) => { 
+// swiper 생성
+
+const swiperr = document.querySelectorAll('.swiper')[0];
+
+const swiper = new Swiper(swiperr);
+
+const swiperFunc = (thisSwiper) => {
+
+}
+
+const jsonData = async (jsonUrl) => {
   const res = await fetch(jsonUrl);
   const posts = await res.json();
   return posts
 } // e: jsonData
 
-const slidePush = (thisEl, thisCont) => {  // slider cont 입력
-  let sliderWrap = thisEl.querySelector('.option-info__slider');
-  sliderWrap.innerHTML = thisCont;
+const listPush = (thisEl, thisCont) => {  // list cont 입력
+  let listWrap = thisEl.querySelector('.option-info__list'),
+      listInner = createTag("div","option-info__list-inner");
+
+  thisCont.forEach((thisInfo,idx) => {
+    let lists = createTag("div","option-info__list-lists");  // , 
+    lists.innerHTML = thisInfo; // list 담기
+    listInner.appendChild(lists); 
+  })
+  listWrap.appendChild(listInner);
+
+
+  if(listWrap.dataset.swiper == "on"){ // 슬라이드 or 리스트만 할지 체크
+    let swiperWrap = listWrap.children,
+        slider1 = swiperWrap[0].childNodes;
+    listWrap.className = "swiper";
+    swiperWrap[0].classList.add("swiper-wrapper");
+
+
+    slider1.forEach((el, idx) => {
+      el.classList.add("swiper-slide");
+      console.log(el)
+    })
+  }
+}
+// 슬라이드 연결하기
+
+const createTag = (tagName, tagClass, tagAttr) => { // 태그 생성 및 클래스, 속성 추가  : div, id, class, [[attr, attrName],[attr2,attrName2]]
+  let returnTag = document.createElement(tagName);
+  if(tagClass !== undefined) returnTag.className = tagClass;
+  if(tagAttr !== undefined){
+    console.log(tagAttr)
+    tagAttr.map((attr,idx) => {
+      returnTag.setAttribute(attr[0] , attr[1])
+    });
+  }
+  return returnTag;
 }
 
-const dataFunc = (getData) => { 
-  let tagData = getData.map(createTag);
+
+const dataMapTag = (getData) => { 
+  let tagData = getData.map(createList);
   return tagData;
 }
 
-const createTag = (e) => { // slider 태그 구조 생성 및 데이터 입력
+const createList = (e) => { // slider 태그 구조 생성 및 데이터 입력
   let optTemplate = '';
-  optTemplate += `<div class="option-info__item" data-id="${e.postId}">
+  optTemplate += `<a href="#" class="option-info__item" data-id="${e.postId}">
       <div class="option-info__item-img">
         <div class="img"><img src="${e.img}" alt="" /></div>
       </div>
@@ -71,7 +106,7 @@ const createTag = (e) => { // slider 태그 구조 생성 및 데이터 입력
         <p class="tit">${e.tit}</p>
         <p class="desc">${e.description}</p>
       </div>
-    </div>`;
+    </a>`;
   return optTemplate;
 }
 
