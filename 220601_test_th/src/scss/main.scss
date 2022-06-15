@@ -23,14 +23,13 @@ body {
   height:100%;
   background:$colors-white;
   z-index:900;
-  &__inner{
+  &__wrap{
     width:500px;
     height:100%;
     padding:30px;
     box-shadow: -5px 0 20px $colors-black;
   }
   &__img {
-
     .img {
       img { 
         width:100%;

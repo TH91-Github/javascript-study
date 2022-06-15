@@ -14,7 +14,9 @@
 <body>
 
   <div id="app">
-    <div class="wrap">
+    <!-- 1차 : index에 구조 직접 입력 -->
+    <!-- 2차 : index에 #app 외에 삭제 -->
+    <div class="wrap"> 
       <div class="section option-info type1">
         <div class="option-info__wrap">
           <div class="option-info__list" data-swiper="on" data-slidesperview="3" data-spacebetween="10" data-navigation="on" data-pagination="on" ><!-- 슬라이드 필요한 경우  data-swiper="on" 추가 -->
@@ -51,20 +53,27 @@
 
 
     <!-- 모달 창 -->
-    <div class="modal-layer">
-      <div class="modal-layer__inner">
-        <div class="modal-layer__img">
-          <div class="img"><img src="" alt=""></div>
-        </div>
-        <div class="modal-layer__text">
-          <p class="tit"></p>
-          <p class="desc"></p>
+
+    <!-- <div class="modal-layer">
+      <div class="modal-layer__wrap">
+        <div class="modal-layer__inner" data-swiper="on">
+          <div class="modal-layer__list">
+            <div class="modal-layer__item">
+              <div class="modal-layer__item-img">
+                <div class="img"><img src="" alt=""></div>
+              </div>
+              <div class="modal-layer__item-text">
+                <p class="tit"></p>
+                <p class="desc"></p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-layer__closed">
         <button type="button" class="btn">닫기</button>
       </div>
-    </div>
+    </div> -->
 
   </div><!-- e: app -->
 </body>
