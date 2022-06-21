@@ -55,7 +55,7 @@ const componentCreate = (cmClass) => {
   componentWrap.innerHTML = `
     <div class="cm-${cmClass}__wrap">
     </div>
-`;
+  `;
   return componentWrap;
 }
 // 2-2 #app에 commponent push
@@ -93,11 +93,11 @@ const listExtraction = (nameExtraction, dataExtraction) => {
 const createList = (itemClass, itemData, urlNum) => { 
   let optTemplate = '';
   optTemplate = `
-      <a href="#" class="cm-${itemClass}__list-item swiper-slide" data-id="${itemData.postId}" data-url-num="${urlNum}">
-        <div class="option-info__item-img">
+      <a href="#" class="cm-${itemClass}__item swiper-slide" data-id="${itemData.postId}" data-url-num="${urlNum}">
+        <div class="cm-${itemClass}__item-img">
           <div class="img"><img src="${itemData.img}" alt="" /></div>
         </div>
-        <div class="option-info__item-desc">
+        <div class="cm-${itemClass}__item-desc">
           <p class="tit">${itemData.tit}</p>
           <p class="desc">${itemData.description}</p>
         </div>
@@ -111,57 +111,10 @@ const commponentContent = (passData, passNum) => {
   let thisCommponentWrap = thisComponent.querySelector(`.cm-${commponentName}__wrap`); // commponent__wrap 선택
   thisCommponentWrap.innerHTML = swiperList(commponentName, passData);
 
-  let changeOpt = {
-    loop : true,
-    breakpoints : {
-      768 : {
-        slidesPerView : 3,
-        spaceBetween : 30,
-      }
-    },
-    slideToClickedSlide: true, // 클릭한 슬라이드로 이동
-    centeredSlides: true, // 센터
-    on: {
-      init: function (e) {
-        console.log("초기")
-        console.log(e)
-        let $iniEl = e.el; 
-        let slides = e.slides;
-        slides.forEach((el,index) =>{
-          el.addEventListener("click", () => {
-            $iniEl.classList.add("clickSwiper")
-          })
-        });
-      },
-      // slideChange : function () {
-      //   console.log("실행")
-      // },
-      // transitionEnd: function () {
-      //   console.log("테스트")
-      // },
-      // slideChangeTransitionStart: function (e) {
-      //   console.log("시작")
-      //   console.log(e)
-      // },
-      slideChangeTransitionEnd: function (e) {
-        console.log("끝")
-        console.log(e)
-        let $endChkEl = e.el;
-
-        // console.log($endChkEl.getAttribute("class"));
-        console.log($endChkEl.getAttribute("class").indexOf("clickSwiper"))
-        // if($endChkEl.getAttribute("class").indexOf)
-        //if($endChkEl.)
-      },
-    }
-  }
-  swiperFunc(thisComponent, changeOpt)// 기준이 되는 commponent , 슬라이드 옵션
+  swiperFunc(thisComponent, listSwiperOpt(thisComponent,passData))// 기준이 되는 commponent , 슬라이드 옵션
 }
 
 // 5 swiper 
-
-
-
 const swiperFunc = (swiperCm, newOpt) =>{
   const thisSwiper = swiperCm.querySelector('.swiper');
 
@@ -197,19 +150,90 @@ const swiperFunc = (swiperCm, newOpt) =>{
   let swiperOpt = Object.assign({}, optionBase, newOpt)  // 기본 옵션 -> 변경된 옵션 합치기
   const newSwiper = new Swiper(thisSwiper,swiperOpt);
 };
-  
-// 객체 합치기 및 병합
-var obj1 = {
-  fruits: ['Banana', 'Mango'],
-  vegetables: "tttt",
-};
-var obj2 = {
-  vegetables: 'Walmart',
-};
 
-var obj3 = Object.assign({}, obj1, obj2);
-console.log(obj3)
+// 6. 슬라이드 개별로 이벤트
+const listSwiperOpt = (listSwiperThis, listSwiperOptData) => {
+  // 슬라이드 옵션 전달
+  let changeOpt = {
+    loop : true,
+    breakpoints : {
+      768 : {
+      slidesPerView : 3,
+      spaceBetween : 30,
+      }
+    },
+    slideToClickedSlide: true, // 클릭한 슬라이드로 이동
+    centeredSlides: true, // 센터
+    on: {
+      init: function (e) {
+        let $iniEl = e.el; 
+        let slides = e.slides;
+        slides.forEach((thisSlide,index) =>{
+          //7. 모달 - 슬라이드 개별 이벤트 발동 시
+          thisSlide.addEventListener("click", () => {
+            let classChk = thisSlide.getAttribute("class");
+            $iniEl.classList.add("clickSwiper");
+            console.log("초기")
+            modalOpen(listSwiperThis,listSwiperOptData); // 활성된 슬라이드 클릭 시 모달 오픈
+            
+          })
+        });
+      },
+      slideChange: function (e){ // init slide click 보다 먼저 발생. 
+        console.log("???")
+        
+      },
+      slideChangeTransitionEnd: function (e) {
+        let $endChkEl = e.el;
+        let $listClickChk = $endChkEl.getAttribute("class").indexOf("clickSwiper");
+        $endChkEl.classList.remove("changeSwiper");
+        if($listClickChk > 0) {
+          console.log("ggg")
+          //modalOpen(listSwiperThis,listSwiperOptData); // 활성되지 않은 슬라이드 클릭 시 센터로 이동 후 모달 오픈
+        }
+      },
+    }
+ }
+ return changeOpt;
+}
 
+// 7. 모달 html 구조 생성, 모달 내 슬라이드 생성
+// modal 생성 및 show
+const modalOpen = (modalThisCm, modalData) => {
+  let  modal = modalPush(modalData);
+  modalThisCm.appendChild(modal)
+
+  let closedBtn = modalThisCm.querySelector('.cm-'+commponentName+'-modal__closed');
+  closedBtn.addEventListener("click", () => {
+    modalOff(modalThisCm)
+  })
+}
+
+// modal 기본 구조 생성 및 팝업 정보 리스트 생성
+const modalPush = (modalPushData) => {
+  let modalWrap = commonCreateTag("div", "cm-"+commponentName+"-modal");
+  modalWrap.innerHTML = `
+    <div class="cm-${commponentName}-modal__wrap swiper">
+      <div class="cm-${commponentName}-modal__list swiper-wrapper">
+        ${listForEach(commponentName+"-modal", modalPushData)}
+      </div>
+    </div>
+    <div class="cm-${commponentName}-modal__closed">
+      <button type="button" class="btn">닫기</button>
+    </div>
+  `;
+  return modalWrap;
+}
+
+
+//
+const modalOff = (cmCurrent) => {
+  let swiperCurrent = cmCurrent.querySelector('.swiper');
+  let modalCurrent = cmCurrent.querySelector('.cm-'+commponentName+'-modal');
+
+  swiperCurrent.classList.remove("clickSwiper"); //
+  modalCurrent.remove();
+}
 
 // result start
 const init = (() => {  
@@ -219,6 +243,9 @@ const init = (() => {
   });
 })();
 
+
+
+
 // common : 함수명 common 시작
 // common - 간단한 class 가진 태그 생성
 function commonCreateTag(tagName, tagClass){ 
@@ -226,65 +253,3 @@ function commonCreateTag(tagName, tagClass){
   if(tagClass !== undefined) returnTag.className = tagClass;
   return returnTag;
 }
-
-
-
-
-
-
-/*
-var clonedNodesArray = jQuery.extend({}, nodesArray);
-  
-const newArray = myArray.map(a => Object.assign({}, a));
-
-$.fn.extend({
-  tubeSlider : function(name){	// 슬라이드 
-    // ※ default - 값 셋팅
-    var d = $.extend({			
-      baseTit : 'tubeSlider',	
-      object : 'sldider',			// 이용자 지정 이름 
-      motionType : 'slider',		// slider, fade 
-      viewSlide : 1,				// 보여지는 슬라이드 
-      sliderW : 'auto',			// li 사이즈 
-      arrows : true,				// 좌우 버튼 (이전, 다음) 
-      swipe : true,
-      indicator : true,			// 인디케이터 Btn  
-      infinite : true,				// 무한 반복 
-      autoPlay : false,			// 무한 반복 일 때 - 자동 롤링 
-      autoBtn : true,			// 무한 반복 일 때 - 자동 롤링 + 버튼 x 
-      time : 2000,				// 자동 롤링 시간 
-      transition : [				// 모션 동작 제어
-       { 
-        speed : 500,			// 롤링 속도 
-        easing : 'cubic-bezier(.33,.53,.47,.83)' 
-       }
-      ]
-    }, name);
-
-$test.tubeSlider({
-      object : "th", 
-      arrows: true, 
-      indicator : true,
-      infinite : true,
-      autoPlay : false
-    });
-
-
-let objArray = [ {a:1} , {b:2} ];
-
-let refArray = objArray; // this will just point to the objArray
-let clonedArray = [...objArray]; // will clone the array
-
-console.log( "before:" );
-console.log( "obj array" , objArray );
-console.log( "ref array" , refArray );
-console.log( "cloned array" , clonedArray );
-
-objArray[0] = {c:3};
-
-console.log( "after:" );
-console.log( "obj array" , objArray ); // [ {c:3} , {b:2} ]
-console.log( "ref array" , refArray ); // [ {c:3} , {b:2} ]
-console.log( "cloned array" , clonedArray ); // [ {a:1} , {b:2} ]
-
-*/
