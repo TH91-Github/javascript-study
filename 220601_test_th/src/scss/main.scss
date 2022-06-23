@@ -32,6 +32,11 @@ a {
       background: $colors-white;
       border: 1px solid $polar-black-50;
       box-sizing: border-box;
+      transition: all .3s;
+      transform: scale(.8);
+    }
+    &.swiper-slide-active {
+      transform: scale(1);
     }
     &-img {
       img {
@@ -55,7 +60,6 @@ a {
     height:100%;
     background:$colors-white;
     z-index:900;
-
     &__wrap {
       width:500px;
       height:100%;
@@ -64,6 +68,9 @@ a {
     }
     &__item {
       &-img {
+        min-width:200px;
+        min-height:200px;
+        margin: 0 auto;
         background: $colors-black-2;
         img { 
           width:100%;
@@ -134,11 +141,9 @@ a {
   }
 }
 .modal-layer {
-  
   &__wrap{
    
   }
-  
   &__text{
     .tit {
       font-family:$kia-font-B;
@@ -149,11 +154,6 @@ a {
       color:$gray-color-1;
     }
   }
-
-  
-
-  
-
 }
 .dimmed {
   position:fixed;

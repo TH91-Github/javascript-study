@@ -117,17 +117,20 @@ const commponentContent = (passData, passNum) => {
 // 5 swiper 
 const swiperFunc = (swiperCm, newOpt) =>{
   const thisSwiper = swiperCm.querySelector('.swiper');
-
-  if(newOpt.navigation !== false){
-    let prevBtn = commonCreateTag("div","swiper-button-prev"),
-        nextBtn = commonCreateTag("div","swiper-button-next");
-    thisSwiper.appendChild(prevBtn);
-    thisSwiper.appendChild(nextBtn);
+  if(newOpt !== undefined){
+    if(newOpt.navigation !== false){
+      let prevBtn = commonCreateTag("div","swiper-button-prev"),
+          nextBtn = commonCreateTag("div","swiper-button-next");
+      thisSwiper.appendChild(prevBtn);
+      thisSwiper.appendChild(nextBtn);
+    }
+    if(newOpt.pagination !== false){
+      let pagination = commonCreateTag("div","swiper-pagination");
+      thisSwiper.appendChild(pagination);
+    }
   }
-  if(newOpt.pagination !== false){
-    let pagination = commonCreateTag("div","swiper-pagination");
-    thisSwiper.appendChild(pagination);
-  }
+  console.log(newOpt)
+  console.log(newOpt.loop)
   // 기본 옵션
   let optionBase = {
     initialSlide : 0,
@@ -166,50 +169,59 @@ const listSwiperOpt = (listSwiperThis, listSwiperOptData) => {
     centeredSlides: true, // 센터
     on: {
       init: function (e) {
-        let $iniEl = e.el; 
+        let $iniEl = e.el;
         let slides = e.slides;
+        $iniEl.classList.add("activeIndex_"+e.activeIndex);
         slides.forEach((thisSlide,index) =>{
           //7. 모달 - 슬라이드 개별 이벤트 발동 시
-          thisSlide.addEventListener("click", () => {
+          thisSlide.addEventListener("click", (e) => {
+            e.preventDefault()
+
             let classChk = thisSlide.getAttribute("class");
-            $iniEl.classList.add("clickSwiper");
-            console.log("초기")
-            modalOpen(listSwiperThis,listSwiperOptData); // 활성된 슬라이드 클릭 시 모달 오픈
-            
+            let indexChk = $iniEl.classList[$iniEl.classList.length-1];
+
+            if(indexChk.charAt(indexChk.length-1) == index){
+              // 현재 슬라이드(가운데) 클릭 했을때
+              modalOpen(listSwiperThis,listSwiperOptData); // 활성된 슬라이드 클릭 시 모달 오픈
+            }else{
+              // 현재 슬라이드 외 슬라이드(좌, 우)를 클릭했을때
+            }
+            // $iniEl.classList.remove(indexChk); // 기존 activeIndex_ 삭제
+            // $iniEl.classList.add("activeIndex_"+index); // 새로운 activeIndex 추가
+            $iniEl.classList.add("clickSwiper"); // 스와이퍼 동작이 아닌 클릭 했을때를 구분하기 위해
+
           })
         });
-      },
-      slideChange: function (e){ // init slide click 보다 먼저 발생. 
-        console.log("???")
-        
       },
       slideChangeTransitionEnd: function (e) {
         let $endChkEl = e.el;
         let $listClickChk = $endChkEl.getAttribute("class").indexOf("clickSwiper");
         $endChkEl.classList.remove("changeSwiper");
         if($listClickChk > 0) {
-          console.log("ggg")
-          //modalOpen(listSwiperThis,listSwiperOptData); // 활성되지 않은 슬라이드 클릭 시 센터로 이동 후 모달 오픈
+          modalOpen(listSwiperThis,listSwiperOptData); // 활성되지 않은 슬라이드 클릭 시 센터로 이동 후 모달 오픈
         }
       },
     }
- }
+  }
  return changeOpt;
 }
 
 // 7. 모달 html 구조 생성, 모달 내 슬라이드 생성
-// modal 생성 및 show
+// 7-1 modal 생성 및 show
 const modalOpen = (modalThisCm, modalData) => {
-  let  modal = modalPush(modalData);
-  modalThisCm.appendChild(modal)
+  let  modalTag = modalPush(modalData);
+  modalThisCm.appendChild(modalTag);
 
   let closedBtn = modalThisCm.querySelector('.cm-'+commponentName+'-modal__closed');
   closedBtn.addEventListener("click", () => {
-    modalOff(modalThisCm)
-  })
+    modalOff(modalThisCm);
+  });
+
+  let modal = modalThisCm.querySelector('.cm-'+commponentName+'-modal')
+  swiperFunc(modal, moDalSwiperOpt())// 기준이 되는 commponent , 슬라이드 옵션
 }
 
-// modal 기본 구조 생성 및 팝업 정보 리스트 생성
+// 7-2 modal 기본 구조 생성 및 팝업 정보 리스트 생성 후 반환
 const modalPush = (modalPushData) => {
   let modalWrap = commonCreateTag("div", "cm-"+commponentName+"-modal");
   modalWrap.innerHTML = `
@@ -225,8 +237,16 @@ const modalPush = (modalPushData) => {
   return modalWrap;
 }
 
+// 7. 모달 슬라이드 옵션
+const moDalSwiperOpt = () => {
+  // 슬라이드 옵션 전달
+  let modalChangeOpt = {
+    loop : true,
+  }
+ return modalChangeOpt;
+}
 
-//
+// 7-3 모달 삭제
 const modalOff = (cmCurrent) => {
   let swiperCurrent = cmCurrent.querySelector('.swiper');
   let modalCurrent = cmCurrent.querySelector('.cm-'+commponentName+'-modal');
@@ -245,6 +265,7 @@ const init = (() => {
 
 
 
+ 
 
 // common : 함수명 common 시작
 // common - 간단한 class 가진 태그 생성
