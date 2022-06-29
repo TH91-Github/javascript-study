@@ -1,7 +1,6 @@
 @import "./base.scss";
 
 body {
-  border:1px solid red;
   font-size: $base-font-size;
   font-family: $font-family;
 }
@@ -15,11 +14,11 @@ a {
   padding: 30px;
 }
 
-
 .cm-option {
   max-width: $grid-full;
   &__wrap {
-    
+    max-width: $screen-md;
+    margin: 0 auto;
   }
   &__list {
     &.swiper {
@@ -44,10 +43,15 @@ a {
       }
     }
     &-desc {
+      padding:15px;
       .tit {
+        font-size:18px;
+        line-height:23px;
         color: $colors-black;
       }
       .desc { 
+        margin-top:15px;
+        line-height:21px;
         color: $gray-color-1;
       }
     }
@@ -60,6 +64,16 @@ a {
     height:100%;
     background:$colors-white;
     z-index:900;
+    animation: movingLeft 1s;
+    
+    @keyframes movingLeft {
+      0% {
+        transform: translateX(100%);
+      }
+      100% {
+        transform: translateX(0);
+      }
+    }
     &__wrap {
       width:500px;
       height:100%;
@@ -140,22 +154,8 @@ a {
     }
   }
 }
-.modal-layer {
-  &__wrap{
-   
-  }
-  &__text{
-    .tit {
-      font-family:$kia-font-B;
-      color:$colors-black;
-    }
-    .txt {
-      font-family:$kia-font-L;
-      color:$gray-color-1;
-    }
-  }
-}
-.dimmed {
+
+.cm-dimmed {
   position:fixed;
   z-index:850;
   top:0;

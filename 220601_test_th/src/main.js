@@ -17,10 +17,9 @@ import 'swiper/css/bundle';
   7. 모달 - 슬라이드 개별 이벤트 발동 시 
     -1 모달 html 구조 생성
     -2 모달 내 슬라이드 생성
-    -3 딤드 생성 및 이벤트 추가
-      - 모달 및 딤드 삭제 (4-1 동일 기능)
-    -4 모달 닫기 버튼 이벤트 추가
+    -3 모달 닫기 버튼 이벤트 추가
       -1 닫기 클릭 시 모달 및 딤드 삭제
+  8. 딤드 
 */
 
 // app 
@@ -47,7 +46,6 @@ const getDataLoad = (getUrl, getNum) => {
   })
   .catch((error) => console.log(error));
 }
-
 
 // 2-1  component 기본 구조 생성
 const componentCreate = (cmClass) => {
@@ -90,10 +88,10 @@ const listExtraction = (nameExtraction, dataExtraction) => {
 }
 
 // 3-3 받은 데이터를 swiper slide 구조에 맞게 생성 후 반환 ↑
-const createList = (itemClass, itemData, urlNum) => { 
+const createList = (itemClass, itemData) => { 
   let optTemplate = '';
   optTemplate = `
-      <a href="#" class="cm-${itemClass}__item swiper-slide" data-id="${itemData.postId}" data-url-num="${urlNum}">
+      <a href="#" class="cm-${itemClass}__item swiper-slide" data-id="${itemData.postId}">
         <div class="cm-${itemClass}__item-img">
           <div class="img"><img src="${itemData.img}" alt="" /></div>
         </div>
@@ -129,8 +127,6 @@ const swiperFunc = (swiperCm, newOpt) =>{
       thisSwiper.appendChild(pagination);
     }
   }
-  console.log(newOpt)
-  console.log(newOpt.loop)
   // 기본 옵션
   let optionBase = {
     initialSlide : 0,
@@ -168,35 +164,28 @@ const listSwiperOpt = (listSwiperThis, listSwiperOptData) => {
     slideToClickedSlide: true, // 클릭한 슬라이드로 이동
     centeredSlides: true, // 센터
     on: {
-      init: function (e) {
-        let $iniEl = e.el;
-        let slides = e.slides;
-        $iniEl.classList.add("activeIndex_"+e.activeIndex);
-        slides.forEach((thisSlide,index) =>{
+      init: function (swiperEl) {
+        let $iniEl = swiperEl.el;
+        let slides = swiperEl.slides;
+        $iniEl.setAttribute("data-active-index",swiperEl.activeIndex); // 초기 현재 active slide 번호 입력
+        slides.forEach((thisSlide,slideIndex) =>{
           //7. 모달 - 슬라이드 개별 이벤트 발동 시
-          thisSlide.addEventListener("click", (e) => {
-            e.preventDefault()
+          thisSlide.addEventListener("click", (event) => {
+            event.preventDefault();
 
-            let classChk = thisSlide.getAttribute("class");
-            let indexChk = $iniEl.classList[$iniEl.classList.length-1];
-
-            if(indexChk.charAt(indexChk.length-1) == index){
-              // 현재 슬라이드(가운데) 클릭 했을때
-              modalOpen(listSwiperThis,listSwiperOptData); // 활성된 슬라이드 클릭 시 모달 오픈
-            }else{
-              // 현재 슬라이드 외 슬라이드(좌, 우)를 클릭했을때
+            console.log($iniEl.dataset.activeIndex)
+            console.log(slideIndex)
+            if($iniEl.dataset.activeIndex == slideIndex){ // 현재 활성된 슬라이드(가운데) 클릭 시 모달 오픈
+              modalOpen(listSwiperThis,listSwiperOptData); 
             }
-            // $iniEl.classList.remove(indexChk); // 기존 activeIndex_ 삭제
-            // $iniEl.classList.add("activeIndex_"+index); // 새로운 activeIndex 추가
             $iniEl.classList.add("clickSwiper"); // 스와이퍼 동작이 아닌 클릭 했을때를 구분하기 위해
-
           })
         });
       },
-      slideChangeTransitionEnd: function (e) {
-        let $endChkEl = e.el;
+      slideChangeTransitionEnd: function (event) {
+        let $endChkEl = event.el;
         let $listClickChk = $endChkEl.getAttribute("class").indexOf("clickSwiper");
-        $endChkEl.classList.remove("changeSwiper");
+        $endChkEl.setAttribute("data-active-index",event.activeIndex); // active 값 변경
         if($listClickChk > 0) {
           modalOpen(listSwiperThis,listSwiperOptData); // 활성되지 않은 슬라이드 클릭 시 센터로 이동 후 모달 오픈
         }
@@ -210,6 +199,7 @@ const listSwiperOpt = (listSwiperThis, listSwiperOptData) => {
 // 7-1 modal 생성 및 show
 const modalOpen = (modalThisCm, modalData) => {
   let  modalTag = modalPush(modalData);
+  
   modalThisCm.appendChild(modalTag);
 
   let closedBtn = modalThisCm.querySelector('.cm-'+commponentName+'-modal__closed');
@@ -217,9 +207,12 @@ const modalOpen = (modalThisCm, modalData) => {
     modalOff(modalThisCm);
   });
 
-  let modal = modalThisCm.querySelector('.cm-'+commponentName+'-modal')
-  swiperFunc(modal, moDalSwiperOpt())// 기준이 되는 commponent , 슬라이드 옵션
+  let modal = modalThisCm.querySelector('.cm-'+commponentName+'-modal'); // modal el
+  let swiperActiveIndex = modalThisCm.querySelector('.swiper-slide-active').getAttribute("data-swiper-slide-index"); // 현재 활성화된 슬라이드
+  swiperFunc(modal, moDalSwiperOpt(swiperActiveIndex))// 기준이 되는 commponent , 슬라이드 옵션(슬라이드 시작 index)
+  dimmedFunc(modalThisCm); // dimmed 처리
 }
+
 
 // 7-2 modal 기본 구조 생성 및 팝업 정보 리스트 생성 후 반환
 const modalPush = (modalPushData) => {
@@ -227,7 +220,7 @@ const modalPush = (modalPushData) => {
   modalWrap.innerHTML = `
     <div class="cm-${commponentName}-modal__wrap swiper">
       <div class="cm-${commponentName}-modal__list swiper-wrapper">
-        ${listForEach(commponentName+"-modal", modalPushData)}
+        ${modalListForEach(commponentName+"-modal", modalPushData)}
       </div>
     </div>
     <div class="cm-${commponentName}-modal__closed">
@@ -237,12 +230,48 @@ const modalPush = (modalPushData) => {
   return modalWrap;
 }
 
+// 7-3 전달 받은 데이터를 list 가공 후 중첩 시켜 하나의 데이터로 만들고 반환 ↑
+const modalListForEach = (listmName, listData) => { 
+  let listArr = modalListExtraction(listmName, listData).reduce((resultEl, currentEl) => resultEl+currentEl)
+  return listArr;
+}
+
+// 7-4 중첩시킬 데이터를 순서대로 list 구조에 뿌린 후 재배열 후 반환 ↑
+const modalListExtraction = (nameExtraction, dataExtraction) => { 
+  let listPush = dataExtraction.map((mapData)=>{
+    return modalCreateList(nameExtraction, mapData);
+  });
+  return listPush;
+}
+
+// 7-5 받은 데이터를 swiper slide 구조에 맞게 생성 후 반환 ↑
+const modalCreateList = (modalClass, modalData) => { 
+  let optTemplate = '';
+  optTemplate = `
+      <div href="#" class="cm-${modalClass}__item swiper-slide">
+        <div class="cm-${modalClass}__item-img">
+          <div class="img"><img src="${modalData.modal.pcLink}" alt="${modalData.modal.alt}" /></div>
+        </div>
+        <div class="cm-${modalClass}__item-desc">
+          <p class="tit">${modalData.modal.tit}</p>
+          <p class="desc">${modalData.modal.script}</p>
+        </div>
+      </div>`;
+  return optTemplate;
+}
+
 // 7. 모달 슬라이드 옵션
-const moDalSwiperOpt = () => {
+const moDalSwiperOpt = (modalSlideTo) => {
+  let modalStart = 1;
+  
+  if(modalSlideTo !== undefined){
+    modalStart = modalSlideTo;
+  }
   // 슬라이드 옵션 전달
   let modalChangeOpt = {
     loop : true,
-  }
+    initialSlide : Number(modalStart),
+  }  
  return modalChangeOpt;
 }
 
@@ -250,10 +279,31 @@ const moDalSwiperOpt = () => {
 const modalOff = (cmCurrent) => {
   let swiperCurrent = cmCurrent.querySelector('.swiper');
   let modalCurrent = cmCurrent.querySelector('.cm-'+commponentName+'-modal');
+  let dimmedOff = $app.querySelector('.cm-dimmed');
 
-  swiperCurrent.classList.remove("clickSwiper"); //
+  swiperCurrent.classList.remove("clickSwiper");
   modalCurrent.remove();
+  dimmedOff.remove();
 }
+
+// 8. 딤드
+const dimmedFunc = (dimedCm) => {
+  let dimedClass= "cm-dimmed";
+  let dimedTag = commonCreateTag("div", dimedClass);
+  
+  if($app.querySelector('.cm-dimmed') == null){ // dimmed가 없을 경우에 생성하도록.
+    $app.append(dimedTag);
+    dimmedEvent(dimedCm,dimedClass);
+  }
+}
+// 8-1 딤드 이벤트 - 클릭
+const dimmedEvent = (dimCm,dimClass) => {
+  let dimmedEl = $app.querySelector('.'+dimClass);
+  dimmedEl.addEventListener("click", (e) => {
+    modalOff(dimCm);
+  })
+}
+
 
 // result start
 const init = (() => {  
@@ -263,9 +313,6 @@ const init = (() => {
   });
 })();
 
-
-
- 
 
 // common : 함수명 common 시작
 // common - 간단한 class 가진 태그 생성
